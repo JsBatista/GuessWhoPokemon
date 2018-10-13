@@ -1,25 +1,33 @@
 import React, { Component } from 'react';
-import logo from './logo.svg';
-import './App.css';
+import Sorter from './components/Sorter/Sorter';
+import Game from './components/Game/Game';
+import PokeBlock from './components/Pokeblock/PokeBlock';
+
 
 class App extends Component {
+  state={
+    readyToPlay: false,
+    playerChoose: "eevee",
+    uniqueCode: "BLANK"
+  }
+
+  choosePokemon = (pokemon) => {
+    this.setState({
+        readyToPlay: true,
+        playerChoose: pokemon,
+        uniqueCode: Math.random().toString(36).substr(2, 4)
+
+      });
+  }
+
   render() {
+    let renderedComponent = this.state.readyToPlay ? 
+      <Game choosed={this.state.playerChoose} code={this.state.uniqueCode}/> 
+      : <Sorter choosePokemon={this.choosePokemon} />;
+    
     return (
-      <div className="App">
-        <header className="App-header">
-          <img src={logo} className="App-logo" alt="logo" />
-          <p>
-            Edit <code>src/App.js</code> and save to reload.
-          </p>
-          <a
-            className="App-link"
-            href="https://reactjs.org"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Learn React
-          </a>
-        </header>
+      <div>
+          {renderedComponent}
       </div>
     );
   }
