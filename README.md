@@ -4,10 +4,10 @@ This is a very simple project that implements the Guess Who boardgame with a pok
 
 How to run it:
 
-$ git clone https://github.com/JsBatista/GuessWhoPokemon.git
-$ cd guesswho
-$ npm i
-$ npm start
+$ git clone https://github.com/JsBatista/GuessWhoPokemon.git \n
+$ cd guesswho \n
+$ npm i \n
+$ npm start \n
 
 You MUST play it with a friend with voice connection on other app to a better experience
 
