@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import Sorter from './components/Sorter/Sorter';
 import Game from './components/Game/Game';
 import PokeBlock from './components/Pokeblock/PokeBlock';
-
+import Reception from './components/Reception/Reception';
 
 class App extends Component {
   state={
@@ -21,6 +21,12 @@ class App extends Component {
   }
 
   render() {
+    return(
+      <Reception />
+    );
+  }
+  /*
+  render() {
     let renderedComponent = this.state.readyToPlay ? 
       <Game choosed={this.state.playerChoose} code={this.state.uniqueCode}/> 
       : <Sorter choosePokemon={this.choosePokemon} />;
@@ -30,7 +36,7 @@ class App extends Component {
           {renderedComponent}
       </div>
     );
-  }
+  }*/
 }
 
 export default App;

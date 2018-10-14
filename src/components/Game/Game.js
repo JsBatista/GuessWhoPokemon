@@ -1,5 +1,8 @@
 import React, {Component} from 'react';
 import PokeBlock from '../Pokeblock/PokeBlock';
+import firebase from 'firebase';
+import WinScreen from './WinScreen/WinScreen';
+import LoseScreen from './LoseScreen/LoseScreen';
 
 class Game extends Component {
 
@@ -127,21 +130,10 @@ class Game extends Component {
             }
         ],
         spriteStyle: "https://img.pokemondb.net/artwork/",
-        oponentsCode: "BLANK",
-        readyToStart: false
+        guess: "",
+        gameStatus: 'going'
     }
 
-    updateOponentsCode = (e) => {
-        this.setState({
-            oponentsCode: e.target.value
-        });
-    }
-
-    startGame = () => {
-        this.setState({
-            readyToStart: true
-        });
-    }
 
     changeStyle = (e) => {
         this.setState({
@@ -154,6 +146,37 @@ class Game extends Component {
         let index = tempState.blocks.map((c) => c.name).indexOf(name.charAt(0).toLowerCase() + name.substr(1));
         tempState.blocks[index].isMarked = !(tempState.blocks[index].isMarked);
         this.setState({...tempState});
+    }
+
+    guessHandler = (e) => {
+        this.setState({
+            guess: e.target.value
+        });
+    }
+
+    makeAGuess = () => {
+
+        let databaseRef = firebase.database().ref('games/'+this.props.room).on('value', snap=>{
+            let room = snap.val();
+            if(this.props.name == room.player1 && this.state.guess == room.player2Pokemon){
+                this.setState({
+                    gameStatus: 'won',
+                    oponent: room.player2
+                });
+            }
+            else if(this.props.name == room.player2 && this.state.guess == room.player1Pokemon){
+                this.setState({
+                    gameStatus: 'won',
+                    oponent: room.player1
+                });
+            }
+            else {
+                this.setState({
+                    gameStatus: 'lose'
+                });
+            }
+        });
+
     }
 
     render(){
@@ -173,41 +196,47 @@ class Game extends Component {
                 padding: '15px'
         }
 
+        let guessOptions = this.state.blocks.map((current)=>{
+            return <option value={current.name}>{current.name.charAt(0).toUpperCase() + current.name.substr(1)}</option>
+        });
 
-        if(this.state.readyToStart){
+        if(this.state.gameStatus == 'won'){
             return(
-                <div>
-                    <h1>Game Code: {this.props.code}</h1>
-                    <h1>Oponent's Code: {this.state.oponentsCode}</h1>
-                    <h2>Choose Your Sprite Style:</h2>
-                        <select onChange={this.changeStyle}>
-                            <option value={"https://img.pokemondb.net/sprites/red-blue/normal/"}>Generation 1</option>
-                            <option value={"https://img.pokemondb.net/sprites/silver/normal/"}>Generation 2</option>
-                            <option value={"https://img.pokemondb.net/sprites/ruby-sapphire/normal/"}>Generation 3</option>
-                            <option value={"https://img.pokemondb.net/sprites/diamond-pearl/normal/"}>Generation 4</option>
-                            <option value={"https://img.pokemondb.net/sprites/black-white/normal/"}>Generation 5</option>
-                            <option value={"https://img.pokemondb.net/artwork/"} selected>Fancy</option>
-                        </select>
-                    <h1>Your pokemon:</h1>
-                    <PokeBlock 
-                        mark = {()=>{}}
-                        name={this.props.choosed.charAt(0).toUpperCase() + this.props.choosed.substr(1)} 
-                        img={this.state.spriteStyle + this.props.choosed + (this.state.spriteStyle == "https://img.pokemondb.net/artwork/"? ".jpg" : ".png")}/>
-    
-                    <div style={style}>
-                        {blocks}
-                    </div>
-                </div>
+                <WinScreen oponent={this.state.oponent} pokemon={this.state.guess}/>
+            );
+        }
+        if(this.state.gameStatus == 'lose'){
+            return(
+                <LoseScreen />
             );
         }
 
-
         return(
             <div>
-                <h1>Game Code: {this.props.code}</h1>
-                <h1>Type your oponnent's code bellow and press lock to start playing.{this.props.code}</h1>
-                <input type="text" placeholder="YOUR OPONENT'S CODE HERE!" onChange={(e)=> {this.updateOponentsCode(e)}}/>
-                <button onClick={this.startGame}>Lock</button>
+                <h1>Room: {this.props.room}</h1>
+                <h1>Oponent's: {this.props.oponent}</h1>
+                <h2>Choose Your Sprite Style:</h2>
+                <select onChange={(e)=>{this.guessHandler(e)}}>
+                    {guessOptions}
+                </select>
+                <button onClick={()=>{this.makeAGuess()}}>Guess!</button>
+                <select onChange={this.changeStyle}>
+                    <option value={"https://img.pokemondb.net/sprites/red-blue/normal/"}>Generation 1</option>
+                    <option value={"https://img.pokemondb.net/sprites/silver/normal/"}>Generation 2</option>
+                    <option value={"https://img.pokemondb.net/sprites/ruby-sapphire/normal/"}>Generation 3</option>
+                    <option value={"https://img.pokemondb.net/sprites/diamond-pearl/normal/"}>Generation 4</option>
+                    <option value={"https://img.pokemondb.net/sprites/black-white/normal/"}>Generation 5</option>
+                    <option value={"https://img.pokemondb.net/artwork/"} selected>Fancy</option>
+                </select>
+                <h1>Your pokemon:</h1>
+                <PokeBlock 
+                    mark = {()=>{}}
+                    name={this.props.choosed.charAt(0).toUpperCase() + this.props.choosed.substr(1)} 
+                    img={this.state.spriteStyle + this.props.choosed + (this.state.spriteStyle == "https://img.pokemondb.net/artwork/"? ".jpg" : ".png")}/>
+
+                <div style={style}>
+                    {blocks}
+                </div>
             </div>
         );
     };
